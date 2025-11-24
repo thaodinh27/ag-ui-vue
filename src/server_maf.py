@@ -7,6 +7,7 @@ from agent_framework.azure import AzureOpenAIChatClient
 from agent_framework_ag_ui import add_agent_framework_fastapi_endpoint
 from azure.identity import AzureCliCredential
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import Field
 from dotenv import load_dotenv
 
@@ -67,6 +68,14 @@ agent = ChatAgent(
 
 # Create FastAPI app
 app = FastAPI(title="AG-UI Travel Assistant")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 add_agent_framework_fastapi_endpoint(app, agent, "/")
 
 if __name__ == "__main__":
