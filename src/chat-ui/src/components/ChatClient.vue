@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { useAgUi } from '../composables/useAgUi'
 
-const { messages, send } = useAgUi('http://127.0.0.1:8000')
+const { messages, send } = useAgUi('http://localhost:5274/agent')
 const input = ref('')
 
 </script>
