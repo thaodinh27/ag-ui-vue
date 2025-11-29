@@ -1,10 +1,15 @@
 import { HttpAgent } from '@ag-ui/client'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 
-export function useAgUi(url) {
-    const agent = new HttpAgent({ url })
+export function useAgUi(url, accessToken = null) {
+    const agentConfig = { url }
+    if (accessToken) {
+        agentConfig.accessToken = accessToken
+    }
+    const agent = new HttpAgent(agentConfig)
     const messages = ref([])
     const state = ref(null)
+    const isThinking = ref(false)
 
     let subscription = null
     onMounted(() => {
@@ -12,11 +17,13 @@ export function useAgUi(url) {
         subscription = agent.subscribe({
             onRunStartedEvent: ({ event }) => {
                 // could capture thread/run ids if needed
+                isThinking.value = true
             },
             onTextMessageStartEvent: ({ event }) => {
                 const { messageId, role = 'assistant' } = event || {}
                 if (!messageId) return
-                messages.value.push({ id: messageId, role, content: '...' })
+                isThinking.value = false
+                messages.value.push({ id: messageId, role, content: '' })
             },
             onTextMessageContentEvent: ({ event }) => {
                 const { messageId, delta } = event || {}
@@ -43,6 +50,7 @@ export function useAgUi(url) {
             },
             onRunFinishedEvent: ({ event }) => {
                 // run finished
+                isThinking.value = false
             }
         })
     })
@@ -59,5 +67,5 @@ export function useAgUi(url) {
         await agent.runAgent()
     }
 
-    return { messages, state, send }
+    return { messages, state, isThinking, send }
 }
